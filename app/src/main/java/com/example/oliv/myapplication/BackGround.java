@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.os.Parcel;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
@@ -24,33 +25,45 @@ public class BackGround extends IntentService {
 
         public LocationListener(String provider)
         {
-            Log.e(Constants.LOG_TAG, "LocationListener " + provider);
+            Log.d(Constants.LOG_TAG, "LocationListener " + provider);
             mLastLocation = new Location(provider);
         }
 
         @Override
         public void onLocationChanged(Location location)
         {
-            Log.e(Constants.LOG_TAG, "onLocationChanged: " + location);
+            Intent provideLocation = null;
+            Bundle locationBundle = null;
+            Parcel locationParcel = null;
+
+            Log.d(Constants.LOG_TAG, "onLocationChanged: " + location);
             mLastLocation.set(location);
+
+            // TODO filter and broadcast only if better value
+            provideLocation = new Intent(Constants.ACTION_SET_CURRENT_LOCATION);
+            locationBundle = new Bundle(location.getExtras());
+            provideLocation.putExtras(locationBundle);
+
+            // Broadcasts the Intent to receivers in this app.
+            LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(provideLocation);
         }
 
         @Override
         public void onProviderDisabled(String provider)
         {
-            Log.e(Constants.LOG_TAG, "onProviderDisabled: " + provider);
+            Log.d(Constants.LOG_TAG, "onProviderDisabled: " + provider);
         }
 
         @Override
         public void onProviderEnabled(String provider)
         {
-            Log.e(Constants.LOG_TAG, "onProviderEnabled: " + provider);
+            Log.d(Constants.LOG_TAG, "onProviderEnabled: " + provider);
         }
 
         @Override
         public void onStatusChanged(String provider, int status, Bundle extras)
         {
-            Log.e(Constants.LOG_TAG, "onStatusChanged: " + provider);
+            Log.d(Constants.LOG_TAG, "onStatusChanged: " + provider);
         }
     }
 
@@ -64,7 +77,8 @@ public class BackGround extends IntentService {
      */
     public BackGround() {
         // call base class constructor
-        super("BackGround");
+        super(BackGround.class.getName());
+        Log.d(Constants.LOG_TAG, "background created");
     }
 
     @Override
@@ -72,13 +86,16 @@ public class BackGround extends IntentService {
     {
         Log.e(Constants.LOG_TAG, "onStartCommand");
         super.onStartCommand(intent, flags, startId);
-        return START_STICKY;
+        return START_STICKY_COMPATIBILITY;
     }
 
     @Override
     public void onCreate()
     {
-        Log.e(Constants.LOG_TAG, "onCreate");
+        Log.d(Constants.LOG_TAG, "onCreate");
+        super.onCreate();
+
+        // init network manager
         initializeLocationManager();
         // create NETWORK
         try {
@@ -131,40 +148,54 @@ public class BackGround extends IntentService {
      */
     @Override
     protected void onHandleIntent(Intent workIntent) {
-
+        Log.e(Constants.LOG_TAG, "onHandleIntent");
         Intent provideLocation = null;
         Bundle locationBundle = null;
-        switch (workIntent.getAction())
-        {
-            case Constants.GET_CURRENT_LOCATION:
-            {
-                // Puts the data into the Intent
-                provideLocation = new Intent(Constants.PROVIDE_CURRENT_LOCATION);
-                locationBundle = new Bundle();
-                locationBundle.putString(Constants.PROVIDE_CURRENT_LOCATIONS_EXTRA_KEY,
-                        loacationData.getDataReceived().get(loacationData.getDataReceived().size()));
-                provideLocation.putExtra(Constants.PROVIDE_CURRENT_LOCATIONS_EXTRA_KEY, locationBundle);
 
-                // Broadcasts the Intent to receivers in this app.
-                LocalBroadcastManager.getInstance(this).sendBroadcast(provideLocation);
-            };
-            case Constants.GET_LOCATIONS_ACTION :
-            {
-                // Puts the data into the Intent
-                provideLocation = new Intent(Constants.PROVIDE_LOCATIONS_ACTION);
-                locationBundle = new Bundle();
-                locationBundle.putStringArrayList(Constants.PROVIDE_LOCATIONS_EXTRA_KEY, loacationData.getDataReceived());
-                provideLocation.putExtra(Constants.PROVIDE_LOCATIONS_EXTRA_KEY, locationBundle);
+        if(workIntent.getAction() != null) {
 
-                // Broadcasts the Intent to receivers in this app.
-                LocalBroadcastManager.getInstance(this).sendBroadcast(provideLocation);
+            switch (workIntent.getAction()) {
+
+                case Constants.ACTION_GET_CURRENT_LOCATION: {
+                    Log.d(Constants.LOG_TAG, "ACTION_GET_CURRENT_LOCATION");
+                    if (loacationData.getDataReceived().size() != 0)
+                    {
+                        // Puts the data into the Intent
+                        provideLocation = new Intent(Constants.PROVIDE_CURRENT_LOCATION);
+                        locationBundle = new Bundle(loacationData.getDataReceived().get(loacationData.getDataReceived().size()).getExtras());
+                        provideLocation.putExtras(locationBundle);
+
+                        // Broadcasts the Intent to receivers in this app.
+                        LocalBroadcastManager.getInstance(this).sendBroadcast(provideLocation);
+                    }
+                };
+                case Constants.ACTION_SET_CURRENT_LOCATION: {
+                    Log.d(Constants.LOG_TAG, "ACTION_SET_CURRENT_LOCATION");
+                    // add the given data
+                    locationBundle = new Bundle(workIntent.getExtras());
+                    loacationData.getDataReceived().add((Location) locationBundle.get(android.location.LocationManager.KEY_LOCATION_CHANGED));
+                };
+                case Constants.ACTION_GET_LOCATIONS: {
+                    Log.d(Constants.LOG_TAG, "ACTION_GET_LOCATIONS");
+                    // Puts the data into the Intent
+                    // TODO complete when maps is working
+//                provideLocation = new Intent(Constants.PROVIDE_LOCATIONS_ACTION);
+//                locationBundle = new Bundle();
+//                locationBundle.putStringArrayList(Constants.PROVIDE_LOCATIONS_EXTRA_KEY, loacationData.getDataReceived());
+//                provideLocation.putExtra(Constants.PROVIDE_LOCATIONS_EXTRA_KEY, locationBundle);
+//
+//                // Broadcasts the Intent to receivers in this app.
+//                LocalBroadcastManager.getInstance(this).sendBroadcast(provideLocation);
+                };
+                default: {
+                    // Logger error
+                    Log.e(Constants.LOG_TAG, "wrong intent action");
+                };
             }
-            default:
-            {
-                // Logger error
-                Log.e(Constants.LOG_TAG, "wrong intent action");
-            }
-
+        }
+        else  {
+            // Logger error
+            Log.e(Constants.LOG_TAG, "empty intent");
         }
     }
 }
