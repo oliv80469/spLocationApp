@@ -37,8 +37,8 @@ public final class Constants {
     public static final String LOG_TAG =  "BACKGROUND";
 
     // Defines min time for location update in ms
-    public static final int LOCATION_INTERVAL = 1000;
+    public static final int LOCATION_INTERVAL = 0;
 
     // Defines min distance for location update in meter
-    public static final float LOCATION_DISTANCE = 10f;
+    public static final float LOCATION_DISTANCE = 0;
 }

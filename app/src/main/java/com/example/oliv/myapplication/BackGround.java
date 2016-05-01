@@ -84,9 +84,9 @@ public class BackGround extends IntentService {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId)
     {
-        Log.e(Constants.LOG_TAG, "onStartCommand");
+        Log.d(Constants.LOG_TAG, "onStartCommand");
         super.onStartCommand(intent, flags, startId);
-        return START_STICKY_COMPATIBILITY;
+        return START_STICKY;
     }
 
     @Override
@@ -122,7 +122,7 @@ public class BackGround extends IntentService {
     public void onDestroy()
     {
         // Destroy all locationManagers
-        Log.e(Constants.LOG_TAG, "onDestroy");
+        Log.d(Constants.LOG_TAG, "onDestroy");
         super.onDestroy();
         if (mLocationManager != null) {
             for (int i = 0; i < mLocationListeners.length; i++) {
@@ -136,7 +136,7 @@ public class BackGround extends IntentService {
     }
 
     private void initializeLocationManager() {
-        Log.e(Constants.LOG_TAG, "initializeLocationManager");
+        Log.d(Constants.LOG_TAG, "initializeLocationManager");
         if (mLocationManager == null) {
             mLocationManager = (LocationManager) getApplicationContext().getSystemService(Context.LOCATION_SERVICE);
         }
@@ -148,7 +148,7 @@ public class BackGround extends IntentService {
      */
     @Override
     protected void onHandleIntent(Intent workIntent) {
-        Log.e(Constants.LOG_TAG, "onHandleIntent");
+        Log.d(Constants.LOG_TAG, "onHandleIntent");
         Intent provideLocation = null;
         Bundle locationBundle = null;
 
