@@ -1,20 +1,22 @@
 package com.example.oliv.myapplication;
 
-import android.support.v7.app.AppCompatActivity;
+import android.app.Activity;
 import android.os.Bundle;
-import android.app.IntentService;
 import android.content.Context;
 import android.content.Intent;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 
 public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        Log.d(Constants.LOG_TAG, "onCreate");
         super.onCreate(savedInstanceState);
         Intent backGroundService = new Intent(this.getApplicationContext(), BackGround.class);
-        Log.d(Constants.LOG_TAG, "starting main activity");
+
         setContentView(R.layout.activity_main);
         startService(backGroundService);
+        Log.d(Constants.LOG_TAG, "onCreate exit");
     }
 }

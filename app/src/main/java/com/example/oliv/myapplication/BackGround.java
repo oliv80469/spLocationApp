@@ -1,12 +1,15 @@
 package com.example.oliv.myapplication;
 
 import android.app.IntentService;
+import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.os.Parcel;
+import android.support.annotation.Nullable;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
@@ -14,7 +17,7 @@ import android.util.Log;
  * Created by oliv on 28.04.2016.
  */
 
-public class BackGround extends IntentService {
+public class BackGround extends Service {
 
     LoacationData loacationData = new LoacationData();
     private LocationManager mLocationManager = null;
@@ -77,7 +80,7 @@ public class BackGround extends IntentService {
      */
     public BackGround() {
         // call base class constructor
-        super(BackGround.class.getName());
+        super();
         Log.d(Constants.LOG_TAG, "background created");
     }
 
@@ -135,6 +138,12 @@ public class BackGround extends IntentService {
         }
     }
 
+    @Nullable
+    @Override
+    public IBinder onBind(Intent intent) {
+        return null;
+    }
+
     private void initializeLocationManager() {
         Log.d(Constants.LOG_TAG, "initializeLocationManager");
         if (mLocationManager == null) {
@@ -146,7 +155,6 @@ public class BackGround extends IntentService {
      * perform requested request
      * @param workIntent
      */
-    @Override
     protected void onHandleIntent(Intent workIntent) {
         Log.d(Constants.LOG_TAG, "onHandleIntent");
         Intent provideLocation = null;
